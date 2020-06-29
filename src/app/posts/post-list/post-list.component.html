@@ -1,0 +1,20 @@
+<main>
+  <mat-accordion *ngIf="allPosts.length > 0">
+    <mat-expansion-panel *ngFor="let post of allPosts" (opened)="postOpenMap.set(post, true)"
+      (closed)="postOpenMap.set(post, false)">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ postOpenMap.get(post) ? post.title : post.title | slice : 0 : 40 }}
+        </mat-panel-title>
+        <mat-panel-description>
+          <p class="footer">{{ post.createdOn }}</p>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>{{ post.content }}</p>
+      <mat-action-row>
+        <button mat-button color="primary">EDIT</button>
+        <button mat-button color="warn">DELETE</button>
+      </mat-action-row>
+    </mat-expansion-panel>
+  </mat-accordion>
+</main>

@@ -1,0 +1,28 @@
+mat-expansion-panel {
+  margin: auto;
+  margin-top: 1rem;
+}
+
+mat-panel-title {
+  width: 75%;
+}
+
+mat-panel-description {
+  width: 25%;
+}
+
+p {
+  font-size: small;
+  white-space: pre-wrap;
+}
+
+.footer {
+  font-size: xx-small;
+  font-family: monospace;
+  color: slategrey;
+}
+
+:host {
+  display: block;
+  margin-top: 1rem;
+}

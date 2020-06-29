@@ -1,0 +1,31 @@
+<main>
+  <mat-card>
+    <form (submit)="onSave(postForm)" #postForm="ngForm">
+      <mat-form-field>
+        <input
+          matInput placeholder="Title"
+          name="title"
+          required
+          minlength="5"
+          ngModel>
+      </mat-form-field>
+      <mat-form-field>
+        <textarea
+          matInput placeholder="What are you thinking today?"
+          rows=6
+          name="content"
+          required
+          maxlength="140"
+          ngModel>
+        </textarea>
+      </mat-form-field>
+      <button
+        mat-button
+        color="primary"
+        [disabled]="postForm.invalid"
+        type="submit">
+        Save Post
+      </button>
+    </form>
+  </mat-card>
+</main>
