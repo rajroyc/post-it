@@ -26,3 +26,9 @@ p {
   display: block;
   margin-top: 1rem;
 }
+
+.msg-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
