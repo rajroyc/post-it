@@ -1,10 +1,10 @@
-import { HttpClientModule } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Post } from './post';
 import { Subject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class PostService {
   /* Create a new subject to which subscribers can sunscribe to */
   private allUpdatedPosts = new Subject<Post[]>();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   addPost(postTitle: string, postContent: string): void {
     const createdOnDate = new Date().toISOString().replace('T', ' ').substr(0, 19);
@@ -36,6 +36,8 @@ export class PostService {
         /* Once the newly created post has been updated, update the observable on the subject */
         /* ... creates a copy of an array and returns the elements. Hence the elements need to be wrapped within [] */
         this.allUpdatedPosts.next([...this.allPosts]);
+        // route to post lists page after adding the new post
+        this.router.navigate(['/']);
       });
   }
 
@@ -50,6 +52,8 @@ export class PostService {
         console.log(response.message);
         existingPost = updatedPost;
         this.allUpdatedPosts.next([...this.allPosts]);
+        // route to post lists page after updating the existing post
+        this.router.navigate(['/']);
       },
         (error) => {
           console.log('Error updating post: ' + error.message);

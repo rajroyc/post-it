@@ -16,6 +16,8 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   postOpenMap: Map<Post, boolean>;
 
+  isLoading = false;
+
   constructor(public postService: PostService) { }
 
   ngOnDestroy(): void {
@@ -30,8 +32,10 @@ export class PostListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.postOpenMap = new Map();
 
+    this.isLoading = true;
     this.postSubscription = this.postService.getPosts().subscribe({
       next: (posts: Post[]) => {
+        this.isLoading = false;
         this.allPosts = posts;
         posts.forEach(post => {
           if (!this.postOpenMap.has(post)) {

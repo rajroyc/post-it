@@ -1,5 +1,6 @@
 <main>
-  <mat-accordion *ngIf="allPosts.length > 0">
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+  <mat-accordion *ngIf="allPosts.length > 0 && !isLoading">
     <mat-expansion-panel *ngFor="let post of allPosts" (opened)="postOpenMap.set(post, true)"
       (closed)="postOpenMap.set(post, false)">
       <mat-expansion-panel-header>
@@ -17,5 +18,5 @@
       </mat-action-row>
     </mat-expansion-panel>
   </mat-accordion>
-  <span class="msg-display" *ngIf="allPosts.length === 0">No posts to show</span>
+  <span class="msg-display" *ngIf="allPosts.length === 0 && !isLoading">No posts to show</span>
 </main>
