@@ -19,7 +19,7 @@ app.use((req, res, next) => {
   // the client must send these headers in addition to the default headers when accessing the endpoint
   res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   // the client can use these HTTP verbs when accessing this endpoint
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
   next();
 });
 
@@ -34,13 +34,18 @@ app.post("/api/posts", (req, res, next) => {
   })
 
   // the save method on the mongoose post model willl automatically load the data to mongodb
-  post.save();
-
-  // console will show that mongoose automatically adds the _id attribute
-  console.log("Added a new post\n" + post);
+  post.save()
+    .then(result => {
+      // console will show that mongoose automatically adds the _id attribute
+      console.log("Added a new post\n" + result);
+    })
+    .catch(error => {
+      console.log("Error adding a post: " + error);
+    });
 
   return res.status(201).header("Location", req.hostname + "/api/post/" + post._id).json({
-    message: "Post created successfully"
+    message: "Post created successfully",
+    post: post
   })
 });
 
@@ -59,7 +64,21 @@ app.get('/api/posts', (req, res, next) => {
     .catch(error => {
       console.log("Unable to fetch document/s: " + error);
     })
-  ;
+    ;
+});
+
+// app will now delete documents at this delete endpoint
+app.delete("/api/posts/:id", (req, res, next) => {
+  Post.deleteOne({ _id: req.params.id })
+    .then(result => {
+      console.log("Deleting: " + req.params.id);
+      console.log(result);
+      res.status(200).json({ message: "Post " + req.params.id + " has been deleted" });
+    })
+    .catch(error => {
+      console.log("Error on attempting to delete: " + req.params.id);
+    });
+
 });
 
 module.exports = app;

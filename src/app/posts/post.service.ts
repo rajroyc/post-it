@@ -20,10 +20,19 @@ export class PostService {
   addPost(postTitle: string, postContent: string): void {
     const createdOnDate = new Date().toISOString().replace('T', ' ').substr(0, 19);
     const post = { id: null, createdOn: createdOnDate, title: postTitle, content: postContent };
-    this.http.post<{ message: string }>('http://localhost:3000/api/posts', post)
-      .subscribe((responseBody) => {
-        console.log(responseBody.message);
-        this.allPosts.push(post);
+    this.http.post<{ message: string, post: any }>('http://localhost:3000/api/posts', post)
+      .pipe(map(response => {
+        console.log(response.message);
+        return {
+          title: response.post.title,
+          content: response.post.content,
+          id: response.post._id,
+          createdOn: response.post.createdOn
+        };
+      }))
+      .subscribe((addedPost: Post) => {
+        console.log(addedPost.id);
+        this.allPosts.push(addedPost);
         /* Once the newly created post has been updated, update the observable on the subject */
         /* ... creates a copy of an array and returns the elements. Hence the elements need to be wrapped within [] */
         this.allUpdatedPosts.next([...this.allPosts]);
@@ -52,5 +61,15 @@ export class PostService {
         this.allUpdatedPosts.next([...this.allPosts]);
       });
     return this.allUpdatedPosts.asObservable();
+  }
+
+  deletePost(postId: string): void {
+    this.http.delete<{ message: string }>('http://localhost:3000/api/posts/' + postId)
+      .subscribe((response) => {
+        console.log(response.message);
+        const updatedPosts = this.allPosts.filter(post => postId !== post.id);
+        this.allPosts = updatedPosts;
+        this.allUpdatedPosts.next([...this.allPosts]);
+      });
   }
 }
