@@ -39,6 +39,23 @@ export class PostService {
       });
   }
 
+  updatePost(postId: string, title: string, content: string): void {
+    let existingPost: Post = this.allPosts.find(p => p.id === postId);
+    const updatedPost = { ...existingPost };
+    updatedPost.content = content;
+    updatedPost.title = title;
+
+    this.http.put<{ message: string }>('http://localhost:3000/api/posts/' + postId, updatedPost)
+      .subscribe((response) => {
+        console.log(response.message);
+        existingPost = updatedPost;
+        this.allUpdatedPosts.next([...this.allPosts]);
+      },
+        (error) => {
+          console.log('Error updating post: ' + error.message);
+        });
+  }
+
   getPosts(): Observable<Post[]> {
     this.http.get<{ message: string, posts: any }>('http://localhost:3000/api/posts')
       // convert the data we get from the sever
@@ -61,6 +78,11 @@ export class PostService {
         this.allUpdatedPosts.next([...this.allPosts]);
       });
     return this.allUpdatedPosts.asObservable();
+  }
+
+  getPost(postId: string) {
+    return this.http.get<{ _id: string, title: string, content: string, createdOn: string }>
+    ('http://localhost:3000/api/posts/' + postId);
   }
 
   deletePost(postId: string): void {

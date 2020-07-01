@@ -7,7 +7,7 @@
           name="title"
           required
           minlength="5"
-          ngModel>
+          [ngModel]="post?.title">
       </mat-form-field>
       <mat-form-field>
         <textarea
@@ -16,7 +16,7 @@
           name="content"
           required
           maxlength="140"
-          ngModel>
+          [ngModel]="post?.content">
         </textarea>
       </mat-form-field>
       <button
