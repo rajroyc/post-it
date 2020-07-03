@@ -1,8 +1,8 @@
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const dbConnect = require('./db-connect');
-
 const postsRouter = require('./routes/posts');
 
 // connect to mongodb
@@ -10,6 +10,12 @@ dbConnect();
 
 // this will intercept every request, parse their body
 app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// using an express middleware to serve static files
+// path helps to forward all requests for /images to /backend/images
+app.use("/images", express.static(path.join('backend/images')));
 
 // intercept the response, add CORs specific headers to it before sending it back to client
 // when we do not specify a path segment as a method parameter, it means that this interceptor
@@ -19,7 +25,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   // the client must send these headers in addition to the default headers when accessing the endpoint
   res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  // the client can use these HTTP verbs when accessing this endpoint
+  // the client can use these HTTP  verbs when accessing this endpoint
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
   next();
 });

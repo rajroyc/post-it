@@ -6,3 +6,23 @@ mat-form-field,
 textarea {
   width: 100%;
 }
+
+/* This is the css attribute selector format of defining the element which we want to control */
+input[type="file"] {
+  visibility: hidden;
+}
+
+.image-preview {
+  height: 5rem;
+  margin: 1rem 0;
+}
+
+/* This is the format for defining css attributes of specific child elements of a css class
+Here the css attributes of the img child element of the div class="image-preview" is being controlled */
+.image-preview img {
+  height: 100%;
+}
+
+.warning-text {
+  color: red;
+}

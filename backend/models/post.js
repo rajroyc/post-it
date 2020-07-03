@@ -17,6 +17,10 @@ const postSchema = mongoose.Schema({
   createdOn: {
     type: String,
     required: true
+  },
+  imagePath: {
+    type: String,
+    required: true
   }
 });
 

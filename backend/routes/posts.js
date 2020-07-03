@@ -1,16 +1,21 @@
 const express = require('express');
+const multer = require('multer');
 const Post = require('../models/post');
-
+const storage = require('../config/multer-config');
 const router = express.Router();
 
 // app will now serve this post endpoint /api/posts
-router.post("", (req, res, next) => {
+// multer will use the storage options as defined
+// in the storage engine, will attempt to intercept
+// a single file attributed as "image" from the incoming multipart/form request body
+router.post("", multer({ storage: storage }).single("image"), (req, res, next) => {
 
-  // create a new post object
+  // create a new Mongoose post object
   const post = new Post({
     title: req.body.title,
     content: req.body.content,
-    createdOn: req.body.createdOn
+    createdOn: req.body.createdOn,
+    imagePath: req.protocol + '://' + req.get('host') + '/images/' + req.file.filename
   })
 
   // the save method on the mongoose post model willl automatically load the data to mongodb
@@ -79,17 +84,25 @@ router.delete("/:id", (req, res, next) => {
 
 });
 
-router.put("/:id", (req, res, next) => {
+router.put("/:id", multer({ storage: storage }).single("image"), (req, res, next) => {
+
+  let imagePath = req.body.imagePath;
+  if (req.file) {
+    imagePath = req.protocol + '://' + req.get('host') + '/images/' + req.file.filename;
+  }
+
   const post = new Post({
     _id: req.params.id,
     title: req.body.title,
-    content: req.body.content
-  })
+    content: req.body.content,
+    imagePath: imagePath
+  });
+
   Post.updateOne({ _id: req.params.id }, post)
     .then((result) => {
       console.log("Updated post: " + req.params.id);
       console.log(result);
-      res.status(200).json({ message: "Post " + req.params.id + " updated successfully" });
+      res.status(200).json({ message: "Post " + req.params.id + " updated successfully", post: post });
     })
     .catch(error => {
       console.log("Error on updating the post: " + req.params.id);

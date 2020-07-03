@@ -17,17 +17,22 @@ export class PostService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
-  addPost(postTitle: string, postContent: string): void {
+  addPost(postTitle: string, postContent: string, image: File): void {
     const createdOnDate = new Date().toISOString().replace('T', ' ').substr(0, 19);
-    const post = { id: null, createdOn: createdOnDate, title: postTitle, content: postContent };
-    this.http.post<{ message: string, post: any }>('http://localhost:3000/api/posts', post)
+    const postData = new FormData();
+    postData.append('title', postTitle);
+    postData.append('content', postContent);
+    postData.append('createdOn', createdOnDate);
+    postData.append('image', image, postTitle);
+    this.http.post<{ message: string, post: any }>('http://localhost:3000/api/posts', postData)
       .pipe(map(response => {
         console.log(response.message);
         return {
           title: response.post.title,
           content: response.post.content,
           id: response.post._id,
-          createdOn: response.post.createdOn
+          createdOn: response.post.createdOn,
+          imagePath: response.post.imagePath
         };
       }))
       .subscribe((addedPost: Post) => {
@@ -41,16 +46,34 @@ export class PostService {
       });
   }
 
-  updatePost(postId: string, title: string, content: string): void {
+  updatePost(postId: string, postTitle: string, postContent: string, image: File | string): void {
     let existingPost: Post = this.allPosts.find(p => p.id === postId);
-    const updatedPost = { ...existingPost };
-    updatedPost.content = content;
-    updatedPost.title = title;
 
-    this.http.put<{ message: string }>('http://localhost:3000/api/posts/' + postId, updatedPost)
+    let postData: Post | FormData ;
+
+    if (typeof(image) === 'object') {
+      postData = new FormData();
+      postData.append('id', postId);
+      postData.append('title', postTitle);
+      postData.append('content', postContent);
+      postData.append('image', image, postTitle);
+    } else {
+      postData = { ...existingPost };
+      postData.content = postContent;
+      postData.title = postContent;
+      postData.imagePath = image;
+    }
+
+    this.http.put<{ message: string, post: any }>('http://localhost:3000/api/posts/' + postId, postData)
       .subscribe((response) => {
         console.log(response.message);
-        existingPost = updatedPost;
+        existingPost = {
+          id: response.post._id,
+          title: response.post.title,
+          content: response.post.content,
+          createdOn: response.post.createdOn,
+          imagePath: response.post.imagePath
+        };
         this.allUpdatedPosts.next([...this.allPosts]);
         // route to post lists page after updating the existing post
         this.router.navigate(['/']);
@@ -64,7 +87,7 @@ export class PostService {
     this.http.get<{ message: string, posts: any }>('http://localhost:3000/api/posts')
       // convert the data we get from the sever
       // pipe allows us to add any operator for data transformation
-      // here the operator being used is the map operator from rsjs/operatprs
+      // here the operator being used is the map operator from rxjs/operatprs
       // map operator intercepts the observable from the get call,
       // applies the callback it is associated with and emits the new values as a fresh observable
       .pipe(map((postData) => {
@@ -73,11 +96,17 @@ export class PostService {
             title: post.title,
             content: post.content,
             id: post._id,
-            createdOn: post.createdOn
+            createdOn: post.createdOn,
+            imagePath: post.imagePath
           };
         });
       }))
-      .subscribe((transformedPosts) => {
+      .subscribe((transformedPosts: Post[]) => {
+        transformedPosts.forEach(transformedPost => {
+          console.log('Fetched post id: ' + transformedPost.id);
+          console.log('Post title: ' + transformedPost.title);
+          console.log('Post image path: ' + transformedPost.imagePath);
+        });
         this.allPosts = transformedPosts;
         this.allUpdatedPosts.next([...this.allPosts]);
       });
@@ -85,7 +114,7 @@ export class PostService {
   }
 
   getPost(postId: string) {
-    return this.http.get<{ _id: string, title: string, content: string, createdOn: string }>
+    return this.http.get<{ _id: string, title: string, content: string, createdOn: string, imagePath: string }>
     ('http://localhost:3000/api/posts/' + postId);
   }
 
